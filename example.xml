@@ -3,8 +3,8 @@
     <data>
         <Header>
             <RIKSDeclarationType>str1234</RIKSDeclarationType>
-            <RIKSCustomsOffice>str1234</RIKSCustomsOffice>
-            <RIKSGoodsOffice>str1234</RIKSGoodsOffice>
+            <RIKSCustomsOffice>oleole</RIKSCustomsOffice>
+            <RIKSGoodsOffice>offileoffile</RIKSGoodsOffice>
             <RIKSGoodsPlace>str1234</RIKSGoodsPlace>
             <messageCode>str1234</messageCode>
             <mrn>str1234</mrn>

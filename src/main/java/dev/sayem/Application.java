@@ -11,7 +11,7 @@ import java.util.List;
 public class Application {
     public static void main(String[] args) {
         try {
-            List<CSVColumn> columns = XMLParser.parse(new File("example.xml"));
+            List<CSVColumn> columns = CSVParser.parse(new File("example.xml"));
             columns.forEach(c -> System.out.println(c.toString() + "\n------------------------------------------\n"));
             System.out.println(columns.size());
         } catch (ParserConfigurationException | IOException | SAXException e) {

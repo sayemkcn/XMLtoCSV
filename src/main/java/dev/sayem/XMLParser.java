@@ -1,6 +1,6 @@
 package dev.sayem;
 
-import dev.sayem.models.CSVColumn;
+import dev.sayem.models.XMLNode;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -13,53 +13,55 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class XMLParser {
-    private static StringBuilder title = new StringBuilder();
-
     private XMLParser() {
     }
 
-    public static List<CSVColumn> parse(File file) throws ParserConfigurationException, IOException, SAXException {
+    public static List<XMLNode> parse(File file, Map<String, String> labels) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory
                 .newInstance();
         DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
         Document document = docBuilder.parse(file);
 
-        List<CSVColumn> columns = new ArrayList<>();
+        List<XMLNode> xmlNodes = new ArrayList<>();
 
         NodeList nodeList = document.getChildNodes();
 
         for (int i = 0; i < nodeList.getLength(); i++) {
-            Node cNode = nodeList.item(i);
-            if (cNode.getNodeType() != Node.TEXT_NODE) {
-                columns.addAll(childNodes(columns, cNode));
-            }
+            Node node = nodeList.item(i);
+            XMLNode xmlNode = new XMLNode();
+            xmlNode.setName(node.getNodeName());
+            if (labels != null)
+                xmlNode.setLabel(labels.get(node.getNodeName()));
+            xmlNode.setValue(node.getTextContent());
+            xmlNode.setChildren(XMLParser.childNodes(node, labels));
+            xmlNodes.add(xmlNode);
         }
 
-        return columns;
+        return xmlNodes;
     }
 
-    private static List<CSVColumn> childNodes(List<CSVColumn> columns, Node node) {
+    private static List<XMLNode> childNodes(Node node, Map<String, String> labels) {
 
-        title.append(node.getNodeName());
-
+        List<XMLNode> xmlNodes = new ArrayList<>();
 
         for (int i = 0; i < node.getChildNodes().getLength(); i++) {
             Node cNode = node.getChildNodes().item(i);
             if (cNode.getNodeType() == Node.ELEMENT_NODE) {
-                title.append(".").append(cNode.getNodeName());
-                childNodes(columns, cNode);
-            } else if (cNode.getNodeType() == Node.TEXT_NODE && cNode.getChildNodes().getLength() == 0) {
-                title.append(cNode.getNodeName());
-                CSVColumn column = new CSVColumn(title.toString());
-                column.addValue(cNode.getTextContent());
-                columns.add(column);
+                XMLNode xmlNode = new XMLNode();
+                xmlNode.setName(cNode.getNodeName());
+                if (labels != null)
+                    xmlNode.setLabel(labels.get(cNode.getNodeName()));
+                xmlNode.setValue(cNode.getTextContent());
+                xmlNode.setChildren(XMLParser.childNodes(cNode, labels));
+                xmlNodes.add(xmlNode);
             }
         }
 
-        return columns;
+        return xmlNodes;
     }
 
 }
