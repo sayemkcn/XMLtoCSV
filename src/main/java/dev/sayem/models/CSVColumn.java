@@ -10,12 +10,19 @@ public class CSVColumn {
     public CSVColumn() {
     }
 
+    public List<String> getAllItems() {
+        List<String> items = new ArrayList<>();
+        items.add(title);
+        items.addAll(getValues());
+        return items;
+    }
+
     public CSVColumn(String title) {
         this.title = title;
     }
 
-    public void addValue(String value){
-        if (values==null) values = new ArrayList<>();
+    public void addValue(String value) {
+        if (values == null) values = new ArrayList<>();
         values.add(value);
     }
 
@@ -38,8 +45,8 @@ public class CSVColumn {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(title);
-        values.forEach(v->builder.append("\n").append(v));
+        builder.append(title + ",\n");
+        values.forEach(v -> builder.append(v).append(",\n"));
         return builder.toString();
     }
 }
