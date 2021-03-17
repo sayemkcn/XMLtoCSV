@@ -6,6 +6,7 @@ import java.util.List;
 public class CSVColumn {
     private String title;
     private List<String> values;
+    private int fileIndex;
 
     public CSVColumn() {
     }
@@ -21,9 +22,23 @@ public class CSVColumn {
         this.title = title;
     }
 
+    public void addValues(List<String> values) {
+        if (values == null) return;
+        if (this.values == null) this.values = new ArrayList<>();
+        this.values.addAll(values);
+    }
+
     public void addValue(String value) {
         if (values == null) values = new ArrayList<>();
         values.add(value);
+    }
+
+    public int getFileIndex() {
+        return fileIndex;
+    }
+
+    public void setFileIndex(int fileIndex) {
+        this.fileIndex = fileIndex;
     }
 
     public String getTitle() {

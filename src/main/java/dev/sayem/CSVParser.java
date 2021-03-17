@@ -9,9 +9,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class CSVParser {
@@ -20,23 +19,19 @@ public class CSVParser {
     private CSVParser() {
     }
 
-    public static File writeToCSV(File src, File dest) throws Exception {
+    public static File writeToCSV(File[] src, File dest) throws Exception {
         if (dest == null) dest = File.createTempFile("XMLtoCSV", ".csv");
         else if (!dest.exists()) dest.createNewFile();
-        List<CSVColumn> columns = CSVParser.parse(src);
 
-//        CsvColumnWriter writer = new CsvColumnWriter(dest, File.createTempFile("wcsv", ".txt"), columns.size());
-//
-//        columns.forEach(c -> {
-//            try {
-//                List<String> col = new ArrayList<>();
-//                col.add(c.getTitle());
-//                col.addAll(c.getValues());
-//                writer.writeNextCol(col);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        });
+        List<List<CSVColumn>> columnList = Arrays.stream(src).map(f-> {
+            try {
+                return CSVParser.parse(f);
+            } catch (ParserConfigurationException | IOException | SAXException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }).collect(Collectors.toList());
+        List<CSVColumn> columns = merge(columnList);
 
         List<String[]> rows = toCsvRow(columns);
 
@@ -44,19 +39,10 @@ public class CSVParser {
 
             StringBuilder sb = new StringBuilder();
 
-            for (String[] row: rows) {
-                Arrays.stream(row).forEach(c->sb.append(c).append(","));
+            for (String[] row : rows) {
+                Arrays.stream(row).forEach(c -> sb.append(c).append(","));
                 sb.append("\n");
             }
-//            sb.append("id,");
-//            sb.append(',');
-//            sb.append("Name");
-//            sb.append('\n');
-//
-//            sb.append("1");
-//            sb.append(',');
-//            sb.append("Prashant Ghimire");
-//            sb.append('\n');
 
             writer.write(sb.toString());
 
@@ -66,6 +52,36 @@ public class CSVParser {
             System.out.println(e.getMessage());
         }
         return dest;
+    }
+
+    private static List<CSVColumn> merge(List<List<CSVColumn>> columnsList) {
+        List<CSVColumn> columns = new ArrayList<>();
+
+        for (int i = 0; i < columnsList.size(); i++) {
+            List<CSVColumn> cols = columnsList.get(i);
+
+            // Add all element of columns for first index
+            if (i == 0) {
+                columns.addAll(cols);
+                continue;
+            }
+
+            List<String> alreadyMerged = new ArrayList<>();
+            for (CSVColumn colToMerge : cols) {
+                Optional<CSVColumn> colOpt = columns.stream().filter(c -> c.getTitle().equals(colToMerge.getTitle())).findFirst();
+                if (colOpt.isPresent()) {
+                    CSVColumn col = colOpt.get();
+                    if (alreadyMerged.contains(col.getTitle())) continue;
+                    int index = columns.indexOf(col);
+                    col.addValues(colToMerge.getValues());
+                    columns.set(index, col);
+                    alreadyMerged.add(col.getTitle());
+                }
+            }
+
+        }
+
+        return columns;
     }
 
     public static List<CSVColumn> parse(File file) throws ParserConfigurationException, IOException, SAXException {
@@ -85,19 +101,28 @@ public class CSVParser {
 
     private static List<CSVColumn> childNodes(List<CSVColumn> columns, XMLNode node) {
         String toAppend;
-        if (!title.toString().isEmpty()) toAppend = "." + node.getName();
-        else toAppend = node.getName();
+        if (!title.toString().isEmpty()) toAppend = ".'" + node.getName() + "'";
+        else toAppend = "'" + node.getName() + "'";
         title.append(toAppend);
 
         for (XMLNode cNode : node.getChildren()) {
             if (cNode.hasChildren()) {
                 childNodes(columns, cNode);
             } else {
-                String columnTitle = title.toString() + "." + cNode.getName();
+                String columnTitle = title.toString() + ".'" + cNode.getName() + "'";
                 columnTitle = fixTitleForMultipleEncounter(columns, columnTitle);
-                CSVColumn column = new CSVColumn(columnTitle);
-                column.addValue(cNode.getValue());
-                columns.add(column);
+                String finalColumnTitle = columnTitle;
+                Optional<CSVColumn> columnOpt = columns.stream().filter(c -> finalColumnTitle.equals(c.getTitle())).findFirst();
+
+                if (!columnOpt.isPresent()) {
+                    CSVColumn column = new CSVColumn(columnTitle);
+                    column.addValue(cNode.getValue());
+                    columns.add(column);
+                } else {
+                    CSVColumn column = columnOpt.get();
+                    column.addValue(cNode.getValue());
+                    columns.set(columns.indexOf(columnOpt.get()), column);
+                }
             }
         }
 
@@ -127,7 +152,7 @@ public class CSVParser {
 
         for (int i = 0; i < rowSize; i++) {
             String[] row = new String[columnSize];
-            for (int j=0;j<columnSize;j++) {
+            for (int j = 0; j < columnSize; j++) {
                 CSVColumn c = columns.get(j);
                 if (c.getAllItems().size() > i)
                     row[j] = c.getAllItems().get(i);
