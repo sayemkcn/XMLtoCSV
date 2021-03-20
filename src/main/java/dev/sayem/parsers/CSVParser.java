@@ -1,4 +1,4 @@
-package dev.sayem;
+package dev.sayem.parsers;
 
 import dev.sayem.models.CSVColumn;
 import dev.sayem.models.XMLNode;
@@ -16,16 +16,13 @@ import java.util.stream.Collectors;
 public class CSVParser {
     private static StringBuilder title = new StringBuilder();
 
-    private CSVParser() {
-    }
-
-    public static File writeToCSV(File[] src, File dest) throws Exception {
+    public File writeToCSV(File[] src, File dest) throws Exception {
         if (dest == null) dest = File.createTempFile("XMLtoCSV", ".csv");
         else if (!dest.exists()) dest.createNewFile();
 
-        List<List<CSVColumn>> columnList = Arrays.stream(src).map(f-> {
+        List<List<CSVColumn>> columnList = Arrays.stream(src).map(f -> {
             try {
-                return CSVParser.parse(f);
+                return parse(f);
             } catch (ParserConfigurationException | IOException | SAXException e) {
                 e.printStackTrace();
             }
@@ -54,7 +51,7 @@ public class CSVParser {
         return dest;
     }
 
-    private static List<CSVColumn> merge(List<List<CSVColumn>> columnsList) {
+    private List<CSVColumn> merge(List<List<CSVColumn>> columnsList) {
         List<CSVColumn> columns = new ArrayList<>();
 
         for (int i = 0; i < columnsList.size(); i++) {
@@ -84,7 +81,7 @@ public class CSVParser {
         return columns;
     }
 
-    public static List<CSVColumn> parse(File file) throws ParserConfigurationException, IOException, SAXException {
+    public List<CSVColumn> parse(File file) throws ParserConfigurationException, IOException, SAXException {
 
         List<XMLNode> nodes = XMLParser.parse(file, null);
 
@@ -99,7 +96,7 @@ public class CSVParser {
         return columns;
     }
 
-    private static List<CSVColumn> childNodes(List<CSVColumn> columns, XMLNode node) {
+    private List<CSVColumn> childNodes(List<CSVColumn> columns, XMLNode node) {
         String toAppend;
         if (!title.toString().isEmpty()) toAppend = ".'" + node.getName() + "'";
         else toAppend = "'" + node.getName() + "'";
@@ -131,7 +128,7 @@ public class CSVParser {
         return columns;
     }
 
-    private static String fixTitleForMultipleEncounter(List<CSVColumn> columns, String columnTitle) {
+    private String fixTitleForMultipleEncounter(List<CSVColumn> columns, String columnTitle) {
         String title = columnTitle;
         int i = 1;
         try {
@@ -145,7 +142,7 @@ public class CSVParser {
         return title;
     }
 
-    private static List<String[]> toCsvRow(List<CSVColumn> columns) {
+    private List<String[]> toCsvRow(List<CSVColumn> columns) {
         int columnSize = columns.size();
         int rowSize = columns.stream().mapToInt(c -> c.getAllItems().size()).max().orElse(0);
         List<String[]> rows = new ArrayList<>();

@@ -1,4 +1,4 @@
-package dev.sayem;
+package dev.sayem.parsers;
 
 import dev.sayem.models.XMLNode;
 import org.w3c.dom.Document;
