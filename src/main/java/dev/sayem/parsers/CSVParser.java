@@ -63,18 +63,36 @@ public class CSVParser {
                 continue;
             }
 
-            List<String> alreadyMerged = new ArrayList<>();
-            for (CSVColumn colToMerge : cols) {
-                Optional<CSVColumn> colOpt = columns.stream().filter(c -> c.getTitle().equals(colToMerge.getTitle())).findFirst();
+            /*
+             iterate over columns which needs to be merged, if column exists then update the existing column values.
+             */
+//            List<String> alreadyMerged = new ArrayList<>();
+            for (CSVColumn column : columns) {
+                Optional<CSVColumn> colOpt = cols.stream().filter(c -> c.getTitle().equals(column.getTitle())).findFirst();
                 if (colOpt.isPresent()) {
                     CSVColumn col = colOpt.get();
-                    if (alreadyMerged.contains(col.getTitle())) continue;
-                    int index = columns.indexOf(col);
-                    col.addValues(colToMerge.getValues());
-                    columns.set(index, col);
-                    alreadyMerged.add(col.getTitle());
+//                    if (alreadyMerged.contains(col.getTitle())) continue;
+                    int index = columns.indexOf(column);
+                    column.addValues(col.getValues());
+                    columns.set(index, column);
+//                    alreadyMerged.add(col.getTitle());
+                } else {
+                    int index = columns.indexOf(column);
+                    column.addValue("");
+                    columns.set(index, column);
                 }
             }
+//            for (CSVColumn colToMerge : cols) {
+//                Optional<CSVColumn> colOpt = columns.stream().filter(c -> c.getTitle().equals(colToMerge.getTitle())).findFirst();
+//                if (colOpt.isPresent()) {
+//                    CSVColumn col = colOpt.get();
+////                    if (alreadyMerged.contains(col.getTitle())) continue;
+//                    int index = columns.indexOf(col);
+//                    col.addValues(colToMerge.getValues());
+//                    columns.set(index, col);
+////                    alreadyMerged.add(col.getTitle());
+//                }
+//            }
 
         }
 
@@ -89,7 +107,12 @@ public class CSVParser {
 
         for (XMLNode cNode : nodes) {
             if (cNode.hasChildren()) {
-                columns.addAll(childNodes(columns, cNode));
+                List<CSVColumn> colsToAdd = childNodes(columns, cNode);
+                colsToAdd.forEach(col -> {
+                    if (columns.stream().noneMatch(c -> c.getTitle().equals(col.getTitle())))
+                        columns.add(col);
+                });
+//                columns.addAll(childNodes(columns, cNode));
             }
         }
 
