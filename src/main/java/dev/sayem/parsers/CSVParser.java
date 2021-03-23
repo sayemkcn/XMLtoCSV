@@ -64,7 +64,7 @@ public class CSVParser {
             }
 
             /*
-             iterate over columns which needs to be merged, if column exists then update the existing column values.
+             iterate over columns in which new one needs to be merged, if column exists then update the existing column values.
              */
 //            List<String> alreadyMerged = new ArrayList<>();
             for (CSVColumn column : columns) {
@@ -82,6 +82,22 @@ public class CSVParser {
                     columns.set(index, column);
                 }
             }
+            /*
+            Columns that hasn't been added before needs to be added to existing columns
+             */
+            List<CSVColumn> newColumns = cols.stream().filter(col -> {
+                return columns.stream().noneMatch(c -> c.getTitle().equals(col.getTitle()));
+            }).collect(Collectors.toList());
+            int rowSize = columns.isEmpty() ? 0 : columns.get(0).getValues().size();
+            newColumns.forEach(nc -> {
+                List<String> values = new ArrayList<>();
+                for (int r = 1; r < rowSize; r++)
+                    values.add("");
+                values.addAll(nc.getValues());
+                nc.setValues(values);
+                columns.add(nc);
+            });
+
 //            for (CSVColumn colToMerge : cols) {
 //                Optional<CSVColumn> colOpt = columns.stream().filter(c -> c.getTitle().equals(colToMerge.getTitle())).findFirst();
 //                if (colOpt.isPresent()) {
