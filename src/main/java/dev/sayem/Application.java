@@ -14,6 +14,18 @@ public class Application {
     public static void main(String[] args) throws Exception {
         if (args == null || args.length < 2)
             throw new RuntimeException("You must provide a source and destination folder!");
+       convertToCSV(args);
+
+//        if (args == null || args.length < 2)
+//            throw new RuntimeException("You must provide a xsd and xml location!");
+//        if (XMLValidator.isValid(args[0], args[1])) {
+//            System.out.println("XML is valid!");
+//        } else System.out.println("XML is invalid!");
+    }
+
+    public static void convertToCSV(String[] args) throws Exception {
+        if (args == null || args.length < 2)
+            throw new RuntimeException("You must provide a source and destination folder!");
         try {
             long millis = Instant.now().toEpochMilli();
             List<File> files = listFiles(new File(args[0]));
