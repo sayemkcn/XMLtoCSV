@@ -1,5 +1,8 @@
 package dev.sayem.models;
 
+import dev.sayem.utils.DateTimeUtil;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +20,29 @@ public class XMLNodeCl {
     public boolean hasChildren() {
         List<XMLNodeCl> nodes = getChildren();
         return nodes != null && !nodes.isEmpty();
+    }
+
+
+    public String getCode() {
+        if (this.attributes == null) return null;
+        return this.attributes.get("code");
+    }
+
+    public Date getValidFrom() {
+        if (this.attributes == null) return null;
+        String date = this.attributes.get("validFrom");
+        return date == null ? null : DateTimeUtil.parse(date);
+    }
+
+    public Date getValidTill() {
+        if (this.attributes == null) return null;
+        String date = this.attributes.get("validTo");
+        return date == null ? null : DateTimeUtil.parse(date);
+    }
+
+    public String getDescription() {
+        if (this.attributes == null) return null;
+        return this.attributes.get("description");
     }
 
     public Map<String, String> getAttributes() {

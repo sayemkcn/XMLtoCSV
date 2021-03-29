@@ -1,6 +1,8 @@
 package dev.sayem.parsers;
 
 import dev.sayem.models.XMLNodeCl;
+import dev.sayem.utils.Compressor;
+import dev.sayem.utils.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -15,13 +17,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class ClParser {
     private ClParser() {
     }
 
-    public static List<XMLNodeCl> parse(File file, Map<String, String> labels) throws ParserConfigurationException, IOException, SAXException {
+    public static List<List<XMLNodeCl>> parseXmlFromZip(String zipFilePath) throws IOException {
+        String destDir = Compressor.unzip(zipFilePath, FileUtil.createTempDirectory().getAbsolutePath());
+        List<File> files = FileUtil.getInstance().listFiles(new File(destDir));
+
+        List<List<XMLNodeCl>> nodes = files.stream().map(file -> {
+            try {
+                return ClParser.parse(file, null);
+            } catch (ParserConfigurationException | IOException | SAXException e) {
+                e.printStackTrace();
+                return new ArrayList<XMLNodeCl>();
+            }
+        }).collect(Collectors.toList());
+
+        System.out.println("Total: " + nodes.size() + " files parsed.");
+        return nodes;
+    }
+
+    private static List<XMLNodeCl> parse(File file, Map<String, String> labels) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory
                 .newInstance();
         DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();

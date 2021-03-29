@@ -3,8 +3,6 @@ package dev.sayem;
 import dev.sayem.models.XMLNodeCl;
 import dev.sayem.parsers.CSVParser;
 import dev.sayem.parsers.ClParser;
-import dev.sayem.utils.Compressor;
-import dev.sayem.utils.FileUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -12,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Application {
 
@@ -20,7 +17,7 @@ public class Application {
         if (args == null || args.length < 2)
             throw new RuntimeException("You must provide a source and destination folder!");
 
-//        parseXmlFromZip();
+//        updateFromZip("test.zip");
         convertToCSV(args);
 
 //        if (args == null || args.length < 2)
@@ -30,20 +27,35 @@ public class Application {
 //        } else System.out.println("XML is invalid!");
     }
 
-    private static void parseXmlFromZip() throws IOException {
-        String destDir = Compressor.unzip("test.zip", "test");
-        List<File> files = FileUtil.getInstance().listFiles(new File(destDir));
 
-        List<List<XMLNodeCl>> nodes = files.stream().map(file -> {
-            try {
-                return ClParser.parse(file, null);
-            } catch (ParserConfigurationException | IOException | SAXException e) {
-                e.printStackTrace();
-                return new ArrayList<XMLNodeCl>();
+    public static void updateFromZip(String zipPath) throws IOException {
+        List<List<XMLNodeCl>> xmlNodes = ClParser.parseXmlFromZip(zipPath);
+
+
+        for (List<XMLNodeCl> nodes : xmlNodes) { // nodes for each xml file
+            if (nodes.isEmpty()) continue;
+            for (XMLNodeCl node : nodes.get(0).getChildren()) { // iterate over nodes from a single xml file
+                if (!"ns:SimpleItem".equals(node.getName())) continue;
+                System.out.println(node.getName());
+                System.out.println(node.getCode());
+                System.out.println(node.getValidFrom());
+                System.out.println(node.getValidTill());
+                XMLNodeCl descNode = findDescriptionNode(node);
+                System.out.println(descNode == null ? null : descNode.getDescription());
+                System.out.println(node.getNodeId());
+
             }
-        }).collect(Collectors.toList());
 
-        System.out.println("Nodes count: " + nodes.size());
+        }
+
+    }
+
+    private static XMLNodeCl findDescriptionNode(XMLNodeCl node) {
+        if (node == null) return null;
+        if (node.getChildren() != null && !node.getChildren().isEmpty()) {
+            return node.getChildren().stream().filter(n -> "ns:CodeDescription".equals(n.getName())).findFirst().orElse(null);
+        }
+        return null;
     }
 
     public static void convertToCSV(String[] args) throws Exception {
