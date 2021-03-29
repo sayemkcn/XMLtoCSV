@@ -1,6 +1,10 @@
 package dev.sayem;
 
+import dev.sayem.models.XMLNodeCl;
 import dev.sayem.parsers.CSVParser;
+import dev.sayem.parsers.ClParser;
+import dev.sayem.utils.Compressor;
+import dev.sayem.utils.FileUtil;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -8,19 +12,38 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Application {
 
     public static void main(String[] args) throws Exception {
         if (args == null || args.length < 2)
             throw new RuntimeException("You must provide a source and destination folder!");
-       convertToCSV(args);
+
+//        parseXmlFromZip();
+        convertToCSV(args);
 
 //        if (args == null || args.length < 2)
 //            throw new RuntimeException("You must provide a xsd and xml location!");
 //        if (XMLValidator.isValid(args[0], args[1])) {
 //            System.out.println("XML is valid!");
 //        } else System.out.println("XML is invalid!");
+    }
+
+    private static void parseXmlFromZip() throws IOException {
+        String destDir = Compressor.unzip("test.zip", "test");
+        List<File> files = FileUtil.getInstance().listFiles(new File(destDir));
+
+        List<List<XMLNodeCl>> nodes = files.stream().map(file -> {
+            try {
+                return ClParser.parse(file, null);
+            } catch (ParserConfigurationException | IOException | SAXException e) {
+                e.printStackTrace();
+                return new ArrayList<XMLNodeCl>();
+            }
+        }).collect(Collectors.toList());
+
+        System.out.println("Nodes count: " + nodes.size());
     }
 
     public static void convertToCSV(String[] args) throws Exception {
