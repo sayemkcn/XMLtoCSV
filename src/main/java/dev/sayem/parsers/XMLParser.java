@@ -37,14 +37,14 @@ public class XMLParser {
             if (labels != null)
                 xmlNode.setLabel(labels.get(node.getNodeName()));
             xmlNode.setValue(node.getTextContent());
-            xmlNode.setChildren(XMLParser.childNodes(node, labels));
+            xmlNode.setChildren(XMLParser.childNodes(xmlNode, node, labels));
             xmlNodes.add(xmlNode);
         }
 
         return xmlNodes;
     }
 
-    private static List<XMLNode> childNodes(Node node, Map<String, String> labels) {
+    private static List<XMLNode> childNodes(XMLNode parentNode, Node node, Map<String, String> labels) {
 
         List<XMLNode> xmlNodes = new ArrayList<>();
 
@@ -56,7 +56,9 @@ public class XMLParser {
                 if (labels != null)
                     xmlNode.setLabel(labels.get(cNode.getNodeName()));
                 xmlNode.setValue(cNode.getTextContent());
-                xmlNode.setChildren(XMLParser.childNodes(cNode, labels));
+                xmlNode.setParent(parentNode);
+                xmlNode.setChildren(XMLParser.childNodes(xmlNode, cNode, labels));
+                xmlNode.renameDuplicateChildren();
                 xmlNodes.add(xmlNode);
             }
         }

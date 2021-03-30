@@ -146,9 +146,9 @@ public class CSVParser {
                 childNodes(columns, cNode);
             } else {
                 String columnTitle = title.toString() + ".'" + cNode.getName() + "'";
-                columnTitle = fixTitleForMultipleEncounter(columns, columnTitle);
-                String finalColumnTitle = columnTitle;
-                Optional<CSVColumn> columnOpt = columns.stream().filter(c -> finalColumnTitle.equals(c.getTitle())).findFirst();
+//                columnTitle = fixTitleForMultipleEncounter(columns, columnTitle);
+//                String finalColumnTitle = columnTitle;
+                Optional<CSVColumn> columnOpt = columns.stream().filter(c -> columnTitle.equals(c.getTitle())).findFirst();
 
                 if (!columnOpt.isPresent()) {
                     CSVColumn column = new CSVColumn(columnTitle);
