@@ -22,13 +22,15 @@ public class XMLNode {
         if (this.children == null) return;
         Map<String, List<XMLNode>> groupedChildren = this.children.stream().collect(Collectors.groupingBy(XMLNode::getName));
         groupedChildren.forEach((s, xmlNodes) -> {
-//            if (xmlNodes.size()<=1)return;
-            for (int i = 0; i < xmlNodes.size(); i++) {
-                XMLNode n = xmlNodes.get(i);
-                int index = children.indexOf(n);
-                String name = i == 0 ? n.getName() : n.getName() + i;
-                n.setName(name);
-                children.set(index, n);
+            if (xmlNodes.size() >= 2) {
+                for (int i = 0; i < xmlNodes.size(); i++) {
+                    XMLNode n = xmlNodes.get(i);
+                    int index = children.indexOf(n);
+//                String name = i == 0 ? n.getName() : n.getName() + i;
+                    String name = n.getName() + (i + 1);
+                    n.setName(name);
+                    children.set(index, n);
+                }
             }
         });
 //        System.out.println(groupedChildren.size());
