@@ -64,6 +64,10 @@ public class Application {
         try {
             long millis = Instant.now().toEpochMilli();
             List<File> files = listFiles(new File(args[0]));
+            if (files.isEmpty()) {
+                System.out.println("No source files found. Aborted execution.");
+                return;
+            }
             File[] filesArr = files.toArray(new File[0]);
             File destPath = new File(args[1]);
             if (!destPath.exists()) destPath.mkdirs();
