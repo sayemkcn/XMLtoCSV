@@ -73,7 +73,10 @@ public class Application {
             if (!destPath.exists()) destPath.mkdirs();
             else if (destPath.isFile()) throw new RuntimeException("Destination path needs to be a directory.");
             File destFile = new File(destPath.getAbsolutePath() + File.separator + UUID.randomUUID() + ".csv");
-            File file = new CSVParser().writeToCSV(filesArr, destFile);
+
+            boolean copyToDefinedCsv = args.length > 2 && args[2].equalsIgnoreCase("copy");
+            File file = new CSVParser().writeToCSV(filesArr, destFile, copyToDefinedCsv);
+
             System.out.println(file.getAbsolutePath());
             System.out.println("SPENT TIME: " + ((Instant.now().toEpochMilli() - millis)) + " ms\n\n\n");
         } catch (ParserConfigurationException | IOException | SAXException e) {
