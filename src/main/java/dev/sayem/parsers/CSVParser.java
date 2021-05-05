@@ -1,6 +1,7 @@
 package dev.sayem.parsers;
 
 import dev.sayem.models.CSVColumn;
+import dev.sayem.models.WeekDays;
 import dev.sayem.models.XMLNode;
 import org.xml.sax.SAXException;
 
@@ -218,9 +219,10 @@ public class CSVParser {
                 int titlePosition = findTitlePosition(titleRow, newTitle);
                 if (titlePosition == -1)
                     newRow[j] = "";
-                else
+                else {
                     newRow[j] = row[titlePosition];
-
+                    if (!newRow[j].isEmpty()) newRow[j] = "[" + newRow[j] + "]";
+                }
                 // update time to cells containing timestamp fields from a1 cel
                 this.updateTimeStampRows(newRow, j);
 
@@ -232,12 +234,14 @@ public class CSVParser {
     }
 
     private void updateTimeStampRows(String[] newRow, int j) {
-        if (newRow == null || newRow[0] == null || newRow[0].trim().isEmpty()) return;
+        if (newRow == null || newRow[0] == null) return;
+        String timestampRow = newRow[0].replace("[", "").replace("]", "");
+        if (timestampRow.trim().isEmpty()) return;
 
         if (j == 0) {
             long timeMillis;
             try {
-                timeMillis = Long.parseLong(newRow[0]);
+                timeMillis = Long.parseLong(timestampRow);
             } catch (NumberFormatException e) {
                 System.out.println("Could not parse to long: " + newRow[0] + "\nException: " + e.getMessage());
                 return;
@@ -250,7 +254,8 @@ public class CSVParser {
         } else if (j == 6) {
             newRow[j] = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
         } else if (j == 7) {
-            newRow[j] = String.valueOf(cal.get(Calendar.DAY_OF_WEEK));
+            WeekDays weekDay = WeekDays.fromNumber(Calendar.DAY_OF_WEEK);
+            newRow[j] = weekDay.getTitle();
         } else if (j == 8) {
             newRow[j] = String.valueOf(cal.get(Calendar.HOUR));
         }
