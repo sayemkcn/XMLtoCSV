@@ -221,7 +221,7 @@ public class CSVParser {
                     newRow[j] = "";
                 else {
                     newRow[j] = row[titlePosition];
-                    if (!newRow[j].isEmpty()) newRow[j] = "[" + newRow[j] + "]";
+                    if (!newRow[j].isEmpty()) newRow[j] = "['" + newRow[j] + "']";
                 }
                 // update time to cells containing timestamp fields from a1 cel
                 this.updateTimeStampRows(newRow, j);
@@ -235,7 +235,7 @@ public class CSVParser {
 
     private void updateTimeStampRows(String[] newRow, int j) {
         if (newRow == null || newRow[0] == null) return;
-        String timestampRow = newRow[0].replace("[", "").replace("]", "");
+        String timestampRow = newRow[0].replace("['", "").replace("']", "");
         if (timestampRow.trim().isEmpty()) return;
 
         if (j == 0) {
