@@ -30,7 +30,11 @@ public class CSVColumn {
 
     public void addValue(String value) {
         if (values == null) values = new ArrayList<>();
-        values.add(value);
+
+        if (value == null)
+            values.add("");
+        else
+            values.add(value);
     }
 
     public int getFileIndex() {
